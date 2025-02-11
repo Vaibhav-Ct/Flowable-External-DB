@@ -4,8 +4,11 @@ import org.flowable.engine.*;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
-
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.List;
+
+import static org.apache.tomcat.util.net.openssl.OpenSSLStatus.getName;
 
 public class TaskCompletion {
     public static void main(String[] args) {
@@ -38,13 +41,20 @@ public class TaskCompletion {
 
         RuntimeService runtimeService = processEngine.getRuntimeService();
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("myProcess");
-        System.out.println("Process Instance ID: " + processInstance.getId());
+        Logger logger = Logger.getLogger(TaskCompletion.class.getName());
 
-        TaskService taskService = processEngine.getTaskService();
 
         // Get all tasks for the process instance
+        TaskService taskService = processEngine.getTaskService();
         List<Task> tasks = taskService.createTaskQuery().list();
+        for(int i=1;i<=3;i++) {
+            ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("myProcess");
+            System.out.println("Process Instance ID: " + processInstance.getId());
+            taskService = processEngine.getTaskService();
+            tasks = taskService.createTaskQuery().list();
+            logger.info("Task List: " + tasks.size());
+        }
+
 
         for (Task task : tasks) {
             System.out.println("Task Name: " + task.getName());
@@ -54,6 +64,7 @@ public class TaskCompletion {
             taskService.complete(task.getId());
             System.out.println("Task completed!");
         }
+
 //        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 //
 //        // Get Flowable Services
